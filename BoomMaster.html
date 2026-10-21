@@ -127,6 +127,47 @@
     background: #0a0f24; border: 1px solid var(--line); border-bottom-width: 3px; white-space: nowrap;
   }
   .note { margin: 0; font-size: 13px; color: var(--muted); max-width: 70ch; }
+  .pad-red { --me: #ff5a4e; }
+  .pad-blue { --me: #4aa3ff; }
+  .pad-red .bombbtn { border-color: #ff5a4e; }
+  .pad-blue .bombbtn { border-color: #4aa3ff; }
+  .pad-red, .pad-blue {
+    position: fixed; z-index: 20;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    pointer-events: none;
+  }
+  .pad-red { position: fixed !important; left: max(16px, env(safe-area-inset-left, 0px)) !important; right: max(16px, env(safe-area-inset-right, 0px)) !important; bottom: max(12px, env(safe-area-inset-bottom, 0px)) !important; top: auto !important; }
+  .pad-blue { position: fixed !important; left: max(16px, env(safe-area-inset-left, 0px)) !important; right: max(16px, env(safe-area-inset-right, 0px)) !important; top: max(12px, env(safe-area-inset-top, 0px)) !important; bottom: auto !important; }
+  .pad-red > *, .pad-blue > * { pointer-events: auto; opacity: .9; }
+  .pad {
+    --me: var(--red);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 4px 10px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .stick {
+    position: relative; width: 150px; height: 150px; flex: none; border-radius: 50%;
+    background: radial-gradient(circle, #1a2246 0, #0e1330 72%); border: 2px solid var(--line); touch-action: none;
+  }
+  .knob {
+    position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px;
+    border-radius: 50%; background: var(--brass); border: 3px solid rgba(255, 255, 255, .35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .5); pointer-events: none;
+  }
+  .bombbtn {
+    width: 112px; height: 112px; flex: none; border-radius: 50%; touch-action: none;
+    font: 400 22px/1 var(--display); letter-spacing: .04em; color: #fff; cursor: pointer;
+    background: var(--me); border: 4px solid rgba(0, 0, 0, .35); box-shadow: 0 6px 16px rgba(0, 0, 0, .45);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bombbtn.on { transform: scale(.94); filter: brightness(1.18); }
+  .pad-label { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 700; text-align: center; margin: 0; }
+  @media (orientation: landscape) and (max-height: 520px) {
+    .pad { padding: 0; }
+    .pad-label { display: block; font-weight: 800; text-align: center; min-width: 80px; }
+    .stick { width: 128px; height: 128px; }
+    .bombbtn { width: 96px; height: 96px; }
+  }
   @media (max-width: 640px) { .stage { min-height: 500px; } }
   :focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { .pulse-dots::after { animation: none; content: '...'; } .btn { transition: none; } }
@@ -137,6 +178,7 @@
     <div class="brand">BOMB ARENA</div>
     <div class="tools">
       <span id="status" class="status" role="status">Belum tersambung</span>
+      <button id="btnTouch" class="mini" type="button">Kontrol sentuh: mati</button>
       <button id="btnMute" class="mini" type="button">Suara: nyala</button>
       <button id="btnLeave" class="mini" type="button" hidden>Keluar</button>
     </div>
@@ -204,11 +246,23 @@
     <div id="toast" class="toast" role="status" hidden></div>
   </div>
 
+  <div id="padRed" class="pad pad-red" hidden>
+    <div id="stickRed" class="stick" role="application" aria-label="Joystick gerak pemain Merah"><div id="knobRed" class="knob"></div></div>
+    <p class="pad-label">Kontrol: MERAH</p>
+    <button id="btnBombRed" class="bombbtn" type="button" aria-label="Lempar bom pemain Merah">BOM</button>
+  </div>
+
+  <div id="padBlue" class="pad pad-blue" hidden>
+    <div id="stickBlue" class="stick" role="application" aria-label="Joystick gerak pemain Biru"><div id="knobBlue" class="knob"></div></div>
+    <p class="pad-label">Kontrol: BIRU</p>
+    <button id="btnBombBlue" class="bombbtn" type="button" aria-label="Lempar bom pemain Biru">BOM</button>
+  </div>
+
   <div class="legend">
     <div class="chip red"><b>MERAH (Host)</b> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> gerak <kbd>Spasi</kbd> bom</div>
     <div class="chip blue"><b>BIRU (Join)</b> <kbd>&uarr;</kbd><kbd>&larr;</kbd><kbd>&darr;</kbd><kbd>&rarr;</kbd> gerak <kbd>Enter</kbd> atau <kbd>/</kbd> bom</div>
   </div>
-  <p class="note">Mode online memakai PeerJS (WebRTC): data permainan berjalan langsung antar-browser, tetapi kedua pemain butuh internet untuk tahap penyambungan awal. Game ini butuh keyboard.</p>
+  <p class="note">Mode online memakai PeerJS (WebRTC): data permainan berjalan langsung antar-browser, tetapi kedua pemain butuh internet untuk tahap penyambungan awal. Di Android atau layar sentuh, joystick dan tombol BOM muncul otomatis saat pertandingan berjalan.</p>
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -351,6 +405,105 @@ window.addEventListener('keyup', e => {
   if (e.key === '/') down.delete('Slash');
 });
 window.addEventListener('blur', () => down.clear());
+
+/* ---- Kontrol sentuh Android: controller MERAH + controller BIRU ---- */
+const touchRed = { mx: 0, my: 0, bomb: false };
+const touchBlue = { mx: 0, my: 0, bomb: false };
+let touchEnabled = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+let bombTimerRed = null, bombTimerBlue = null;
+
+const stickRedEl = $('stickRed'), knobRedEl = $('knobRed'), bombRedEl = $('btnBombRed');
+const stickBlueEl = $('stickBlue'), knobBlueEl = $('knobBlue'), bombBlueEl = $('btnBombBlue');
+
+function resetTouch() {
+  touchRed.mx = 0; touchRed.my = 0; touchRed.bomb = false;
+  touchBlue.mx = 0; touchBlue.my = 0; touchBlue.bomb = false;
+  clearTimeout(bombTimerRed);
+  clearTimeout(bombTimerBlue);
+  knobRedEl.style.transform = '';
+  knobBlueEl.style.transform = '';
+  bombRedEl.classList.remove('on');
+  bombBlueEl.classList.remove('on');
+}
+
+function mergeInput(k, t) {
+  let mx = k.mx + t.mx, my = k.my + t.my;
+  const l = Math.hypot(mx, my);
+  if (l > 1) { mx /= l; my /= l; }
+  return { mx: r2(mx), my: r2(my), bomb: k.bomb || t.bomb };
+}
+
+function setupTouchStick(stickEl, knobEl, touchState) {
+  let activeId = null;
+
+  const moveStick = e => {
+    const r = stickEl.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    const dy = e.clientY - (r.top + r.height / 2);
+    const dist = Math.hypot(dx, dy);
+    const max = r.width * 0.34;
+    const safeDist = dist || 1;
+    const scale = dist > max ? max / dist : 1;
+
+    knobEl.style.transform = 'translate(' + (dx * scale) + 'px,' + (dy * scale) + 'px)';
+    if (dist / max < 0.3) {
+      touchState.mx = 0; touchState.my = 0;
+    } else {
+      touchState.mx = dx / safeDist;
+      touchState.my = dy / safeDist;
+    }
+  };
+
+  const endStick = e => {
+    if (e.pointerId !== activeId) return;
+    activeId = null;
+    touchState.mx = 0; touchState.my = 0;
+    knobEl.style.transform = '';
+  };
+
+  stickEl.addEventListener('pointerdown', e => {
+    activeId = e.pointerId;
+    try { stickEl.setPointerCapture(e.pointerId); } catch (err) {}
+    sfx.ensure();
+    moveStick(e);
+    e.preventDefault();
+  });
+  stickEl.addEventListener('pointermove', e => {
+    if (e.pointerId === activeId) moveStick(e);
+  });
+  stickEl.addEventListener('pointerup', endStick);
+  stickEl.addEventListener('pointercancel', endStick);
+}
+
+function setupTouchBomb(bombEl, touchState, timerName) {
+  bombEl.addEventListener('pointerdown', e => {
+    clearTimeout(window[timerName]);
+    touchState.bomb = true;
+    bombEl.classList.add('on');
+    sfx.ensure();
+    e.preventDefault();
+  });
+
+  const releaseBomb = () => {
+    clearTimeout(window[timerName]);
+    window[timerName] = setTimeout(() => {
+      touchState.bomb = false;
+      bombEl.classList.remove('on');
+    }, 90);
+  };
+
+  bombEl.addEventListener('pointerup', releaseBomb);
+  bombEl.addEventListener('pointercancel', releaseBomb);
+  bombEl.addEventListener('pointerleave', releaseBomb);
+}
+
+setupTouchStick(stickRedEl, knobRedEl, touchRed);
+setupTouchStick(stickBlueEl, knobBlueEl, touchBlue);
+setupTouchBomb(bombRedEl, touchRed, 'bombTimerRed');
+setupTouchBomb(bombBlueEl, touchBlue, 'bombTimerBlue');
+
+$('padRed').addEventListener('contextmenu', e => e.preventDefault());
+$('padBlue').addEventListener('contextmenu', e => e.preventDefault());
 
 /* =====================================================================
    5. SIMULASI (otoritatif di Host / mode lokal)
@@ -631,6 +784,7 @@ function teardown() {
   net.peer = null; net.conn = null; net.timer = null; net.code = '';
   net.remoteInput = { mx: 0, my: 0, bomb: false };
   netEvents = []; resultShown = false; lastSentInput = '';
+  resetTouch();
   resetClientView();
   fx.clear();
 }
@@ -812,7 +966,7 @@ function clientView(dt, now) {
 function sendClientInput(now) {
   const c = net.conn;
   if (mode !== 'client' || !c || !c.open) return;
-  const i = readInput(KEYMAP[1]);
+  const i = mergeInput(readInput(KEYMAP[1]), touchBlue);
   const key = i.mx + ',' + i.my + ',' + (i.bomb ? 1 : 0);
   if (key !== lastSentInput || now - lastSentAt > 100) {
     c.send({ t: 'in', mx: i.mx, my: i.my, b: i.bomb ? 1 : 0 });
@@ -1071,6 +1225,12 @@ function refreshUI() {
     else st.textContent = net.code ? 'Host · Room ' + net.code : 'Host · menyambung';
   } else if (mode === 'client') { st.textContent = 'Terhubung ke host'; st.classList.add('on'); }
   $('btnLeave').hidden = (mode === 'menu');
+  $('btnTouch').textContent = 'Kontrol sentuh: ' + (touchEnabled ? 'nyala' : 'mati');
+  const showPads = touchEnabled && mode !== 'menu';
+  $('padRed').hidden = !showPads;
+  $('padBlue').hidden = !showPads;
+  $('padRed').style.setProperty('--me', COLORS[0].main);
+  $('padBlue').style.setProperty('--me', COLORS[1].main);
 }
 function toggleMute() {
   sfx.setMuted(!sfx.isMuted());
@@ -1130,6 +1290,7 @@ $('joinCode').addEventListener('input', e => { e.target.value = e.target.value.t
 $('btnLeave').addEventListener('click', () => leave());
 $('btnExit').addEventListener('click', () => leave());
 $('btnMute').addEventListener('click', toggleMute);
+$('btnTouch').addEventListener('click', () => { touchEnabled = !touchEnabled; resetTouch(); refreshUI(); });
 $('btnAgain').addEventListener('click', () => {
   if (mode === 'client') {
     if (net.conn && net.conn.open) { net.conn.send({ t: 'rematch' }); $('btnAgain').disabled = true; $('btnAgain').textContent = 'Menunggu host'; }
@@ -1148,8 +1309,14 @@ function frame(now) {
   let view;
 
   if (mode === 'host' || mode === 'local') {
-    world.players[0].input = readInput(KEYMAP[0]);
-    world.players[1].input = mode === 'local' ? readInput(KEYMAP[1]) : net.remoteInput;
+    // PEMAIN MERAH (Host) bisa dikontrol keyboard ATAU controller/touch Android.
+    // Controller selalu masuk ke input pemain merah di sisi Host.
+    world.players[0].input = mergeInput(readInput(KEYMAP[0]), touchRed);
+    world.players[1].input = mode === 'local'
+      ? mergeInput(readInput(KEYMAP[1]), touchBlue)
+      : (touchBlue.mx || touchBlue.my || touchBlue.bomb
+          ? mergeInput(readInput(KEYMAP[1]), touchBlue)
+          : net.remoteInput);
     acc += dt;
     let guard = 0;
     while (acc >= STEP && guard++ < 5) {
